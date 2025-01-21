@@ -16,18 +16,22 @@ public class Mobil {
     @Column(name = "harga_mobil")
     private Double hargaMobil;
 
+    @Column(name = "foto_url")
+    private String fotoUrl;
+
     @ManyToOne
     @JoinColumn(name = "id_admin", nullable = false)
     private Admin admin;
 
-    public Mobil(Long id, Admin admin, String namaMobil, Double hargaMobil) {
+    public Mobil() {
+    }
+
+    public Mobil(Long id, Admin admin, String namaMobil, Double hargaMobil, String fotoUrl) {
         this.id = id;
         this.admin = admin;
         this.namaMobil = namaMobil;
         this.hargaMobil = hargaMobil;
-    }
-
-    public Mobil() {
+        this.fotoUrl = fotoUrl;
     }
 
     public Long getId() {
@@ -52,6 +56,14 @@ public class Mobil {
 
     public void setHargaMobil(Double hargaMobil) {
         this.hargaMobil = hargaMobil;
+    }
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
     }
 
     public Admin getAdmin() {

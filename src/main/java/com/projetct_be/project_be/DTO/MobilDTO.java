@@ -5,14 +5,7 @@ public class MobilDTO {
     private Long idAdmin;
     private String namaMobil;
     private Double hargaMobil;
-
-    public Long getIdAdmin() {
-        return idAdmin;
-    }
-
-    public void setIdAdmin(Long idAdmin) {
-        this.idAdmin = idAdmin;
-    }
+    private String fotoUrl;
 
     public Long getId() {
         return id;
@@ -20,6 +13,14 @@ public class MobilDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getIdAdmin() {
+        return idAdmin;
+    }
+
+    public void setIdAdmin(Long idAdmin) {
+        this.idAdmin = idAdmin;
     }
 
     public String getNamaMobil() {
@@ -36,5 +37,13 @@ public class MobilDTO {
 
     public void setHargaMobil(Double hargaMobil) {
         this.hargaMobil = hargaMobil;
+    }
+
+    public String getFotoUrl() {
+        return fotoUrl;
+    }
+
+    public void setFotoUrl(String fotoUrl) {
+        this.fotoUrl = fotoUrl;
     }
 }
