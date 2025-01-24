@@ -1,6 +1,5 @@
 package com.projetct_be.project_be.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.projetct_be.project_be.DTO.MobilDTO;
 import com.projetct_be.project_be.model.Mobil;
 import com.projetct_be.project_be.service.MobilService;
@@ -44,47 +43,19 @@ public class MobilController {
     @PostMapping("/mobil/tambah/{idAdmin}")
     public ResponseEntity<MobilDTO> tambahMobil(
             @PathVariable Long idAdmin,
-            @RequestParam("mobil") String mobilJson,
-            @RequestParam("file") MultipartFile file) throws IOException {
-
-        // Convert the mobil JSON string to MobilDTO
-        ObjectMapper objectMapper = new ObjectMapper();
-        MobilDTO mobilDTO = objectMapper.readValue(mobilJson, MobilDTO.class);
-
-        // Upload the photo and get the photo URL from MobilImpl
-        String fotoUrl = mobilService.uploadFoto(file);  // Call the uploadFoto from the service implementation
-
-        // Set the photo URL in the DTO
-        mobilDTO.setFotoUrl(fotoUrl);
-
-        // Save the mobil with the photo URL
+            @RequestBody MobilDTO mobilDTO) {
         MobilDTO savedMobil = mobilService.tambahMobilDTO(idAdmin, mobilDTO);
-
-        // Log to ensure the fotoUrl is set correctly
-        System.out.println("Saved Mobil: " + savedMobil);
-
         return ResponseEntity.ok(savedMobil);
     }
 
-    @PutMapping("/mobil/editById/{id}")
+    @PutMapping("/mobil/edit/{id}/{idAdmin}")
     public ResponseEntity<MobilDTO> editMobil(
             @PathVariable Long id,
-            @RequestParam Long idAdmin,
-            @RequestParam(required = false) MultipartFile file,
-            @RequestParam String mobil) throws IOException {
+            @PathVariable Long idAdmin,
+            @RequestParam("mobil") String mobilJson,
+            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
 
-        // Deserialize the mobil JSON to get car details
-        ObjectMapper objectMapper = new ObjectMapper();
-        MobilDTO mobilDTO = objectMapper.readValue(mobil, MobilDTO.class);
-
-        // If a new file is provided, upload it and update the fotoUrl
-        if (file != null) {
-            String fotoUrl = mobilService.editUploadFoto(id, file);
-            mobilDTO.setFotoUrl(fotoUrl);
-        }
-
-        // Edit the other mobil fields without photo
-        MobilDTO updatedMobil = mobilService.editMobilDTO(id, idAdmin, mobilDTO);
+        MobilDTO updatedMobil = mobilService.editMobilDTO(id, idAdmin, mobilJson, file);
         return ResponseEntity.ok(updatedMobil);
     }
 

@@ -9,13 +9,10 @@ import com.projetct_be.project_be.model.Mobil;
 import com.projetct_be.project_be.repository.AdminRepository;
 import com.projetct_be.project_be.repository.MobilRepository;
 import com.projetct_be.project_be.service.MobilService;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -60,6 +57,8 @@ public class MobilImpl implements MobilService {
         mobil.setAdmin(admin);
         mobil.setNamaMobil(mobilDTO.getNamaMobil());
         mobil.setHargaMobil(mobilDTO.getHargaMobil());
+
+        // Set fotoUrl dari DTO
         mobil.setFotoUrl(mobilDTO.getFotoUrl());
 
         Mobil savedMobil = mobilRepository.save(mobil);
@@ -74,16 +73,24 @@ public class MobilImpl implements MobilService {
     }
 
     @Override
-    public MobilDTO editMobilDTO(Long id, Long idAdmin, MobilDTO mobilDTO) throws IOException {
+    public MobilDTO editMobilDTO(Long id, Long idAdmin, String mobilJson, MultipartFile file) throws IOException {
         Mobil existingMobil = mobilRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Mobil tidak ditemukan"));
 
         Admin admin = adminRepository.findById(idAdmin)
-                .orElseThrow(() -> new NotFoundException("Admin dengan ID " + idAdmin + " tidak ditemukan"));
+                .orElseThrow(() -> new NotFoundException("Admin tidak ditemukan"));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        MobilDTO mobilDTO = objectMapper.readValue(mobilJson, MobilDTO.class);
 
         existingMobil.setAdmin(admin);
         existingMobil.setNamaMobil(mobilDTO.getNamaMobil());
         existingMobil.setHargaMobil(mobilDTO.getHargaMobil());
+
+        if (file != null) {
+            String fotoUrl = uploadFoto(file);
+            existingMobil.setFotoUrl(fotoUrl);
+        }
 
         Mobil updatedMobil = mobilRepository.save(existingMobil);
 
@@ -91,12 +98,17 @@ public class MobilImpl implements MobilService {
         result.setId(updatedMobil.getId());
         result.setNamaMobil(updatedMobil.getNamaMobil());
         result.setHargaMobil(updatedMobil.getHargaMobil());
+        result.setFotoUrl(updatedMobil.getFotoUrl());
 
         return result;
     }
 
     @Override
-    public String uploadFoto(MultipartFile file) throws IOException {
+    public void deleteMobil(Long id) throws IOException {
+        mobilRepository.deleteById(id);
+    }
+
+    private String uploadFoto(MultipartFile file) throws IOException {
         String uploadUrl = BASE_URL + "/uploadFoto";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -115,36 +127,10 @@ public class MobilImpl implements MobilService {
         }
     }
 
-    @Override
-    public String editUploadFoto(Long id, MultipartFile file) throws IOException {
-        String editUrl = BASE_URL + "/editUploadFoto";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", file.getResource());
-        body.add("fileId", id.toString());
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(editUrl, HttpMethod.PUT, requestEntity, String.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return extractFileUrlFromResponse(response.getBody());
-        } else {
-            throw new IOException("Failed to update file: " + response.getStatusCode());
-        }
-    }
-
     private String extractFileUrlFromResponse(String responseBody) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonResponse = mapper.readTree(responseBody);
         JsonNode dataNode = jsonResponse.path("data");
         return dataNode.path("url_file").asText();
-    }
-
-    @Override
-    public void deleteMobil(Long id) throws IOException {
-        mobilRepository.deleteById(id);
     }
 }

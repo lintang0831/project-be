@@ -17,11 +17,7 @@ public interface MobilService {
 
     MobilDTO tambahMobilDTO(Long idAdmin, MobilDTO mobilDTO);
 
-    MobilDTO editMobilDTO(Long id, Long idAdmin, MobilDTO mobilDTO) throws IOException;
-
-    String editUploadFoto(Long id, MultipartFile file) throws IOException;
-
-    String uploadFoto(MultipartFile file) throws IOException;
+    MobilDTO editMobilDTO(Long id, Long idAdmin, String mobilJson, MultipartFile file) throws IOException;
 
     void deleteMobil(Long id) throws IOException;
 }
